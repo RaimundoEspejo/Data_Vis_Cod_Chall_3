@@ -1,13 +1,108 @@
-Version: 1.0
+## R coding challenge 3 ####
+# Partner 1: Raimundo Espejo 
+# Partner 2: Camila Cuadrado
 
-RestoreWorkspace: Default
-SaveWorkspace: Default
-AlwaysSaveHistory: Default
+### Question 1 #### 
+# Using ggplot, create a boxplot of DON by Treatment so that the plot looks like the image below.
+# a) Jitter points over the boxplot and fill the points and boxplots Cultivar with two colors from the cbbPallete introduced last week
+# b) Change the transparency of the jittered points to 0.6. 
+# c) The y-axis should be labeled "DON (ppm)", and the x-axis should be left blank. 
+# d) The plot should use a classic theme
+# e) The plot should also be faceted by Cultivar
 
-EnableCodeIndexing: Yes
-UseSpacesForTab: Yes
-NumSpacesForTab: 2
-Encoding: UTF-8
+library(ggplot2)
 
-RnwWeave: Sweave
-LaTeX: pdfLaTeX
+# Preparing the color blind palette that we are going to use. If we define color within a vector, then we can just reference the colors later in the figures
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# Reading the .csv file that contains the data and storing it in "data" object
+data <- read.csv("MycotoxinData.csv", na.strings = "na")
+
+# Creating the image of question 1
+question1 <- ggplot(data, aes(x = Treatment, y = DON, color = Cultivar, fill = Cultivar)) +
+       geom_boxplot(position = position_dodge()) +
+  geom_point(position = position_jitterdodge(dodge.width = 0.9), alpha = 0.6, ) +
+  facet_wrap(~Cultivar, scales = "fixed") +
+  xlab("") +
+  ylab("DON (ppm)") +
+  scale_fill_manual(values = c(cbbPalette[[6]], cbbPalette[[4]])) +
+  scale_color_manual(values = c(cbbPalette[[6]], cbbPalette[[4]])) +
+  theme_classic()
+
+question1
+
+### Question 2 ####
+# Change the factor order level so that the treatment “NTC” is first, followed by “Fg”, “Fg + 37”, “Fg + 40”, and “Fg + 70". 
+
+data$Treatment <- factor(data$Treatment, levels = c("NTC", "Fg", "Fg + 37", "Fg + 40", "Fg + 70"))
+
+### Question 3 ####
+# Change the y-variable to plot X15ADON and MassperSeed_mg. The y-axis label should now be “15ADON” and “Seed Mass (mg)”. Save plots made in questions 1 and 3 into three separate R objects.
+
+question3_plot1 <- ggplot(data, aes(x = Treatment, y = X15ADON, color = Cultivar, fill = Cultivar)) +
+  geom_boxplot(position = position_dodge()) +
+  geom_point(position = position_jitterdodge(dodge.width = 0.9), alpha = 0.6, ) +
+  facet_wrap(~Cultivar, scales = "fixed") +
+  xlab("") +
+  ylab("15ADON") +
+  scale_fill_manual(values = c(cbbPalette[[6]], cbbPalette[[4]])) +
+  scale_color_manual(values = c(cbbPalette[[6]], cbbPalette[[4]])) +
+  theme_classic()
+
+question3_plot1
+
+question3_plot2 <- ggplot(data, aes(x = Treatment, y = MassperSeed_mg, color = Cultivar, fill = Cultivar)) +
+  geom_boxplot(position = position_dodge()) +
+  geom_point(position = position_jitterdodge(dodge.width = 0.9), alpha = 0.6, ) +
+  facet_wrap(~Cultivar, scales = "fixed") +
+  xlab("") +
+  ylab("Seed Mass (mg)") +
+  scale_fill_manual(values = c(cbbPalette[[6]], cbbPalette[[4]])) +
+  scale_color_manual(values = c(cbbPalette[[6]], cbbPalette[[4]])) +
+  theme_classic()
+
+question3_plot2
+
+### Question 4 ####
+# Use ggarrange function to combine all three figures into one with three columns and one row. Set the labels for the subplots as A, B and C. Set the option common.legend = T within ggarage function. 
+# What did the common.legend option do?
+# It sets a common legend among the graphs on top of the figure.
+# HINT: I didn’t specifically cover this in the tutorial, but you can go to the help page for the ggarange function to figure out what the common.legend option does and how to control it. 
+
+library(ggpubr)
+
+question4 <- ggarrange(question1, 
+                       question3_plot1, 
+                       question3_plot2, 
+                       labels = c("A", "B", "C"),
+                       nrow = 1,  
+                       ncol = 3,
+                       common.legend = T)
+question4
+
+### Question 5 ####
+# Use geom_pwc() to add t.test pairwise comparisons to the three plots made above. Save each plot as a new R object, and combine them again with ggarange as you did in question 4. 
+
+question5_plot1 <- question1 +
+  geom_pwc(aes(group = Treatment), method = "t_test", label = "p.adj.signif")
+
+question5_plot2 <- question3_plot1 +
+  geom_pwc(aes(group = Treatment), method = "t_test", label = "p.adj.signif")
+
+question5_plot3 <- question3_plot2 +
+  geom_pwc(aes(group = Treatment), method = "t_test", label = "p.adj.signif")
+
+question5_plot4 <- ggarrange(question5_plot1, 
+                             question5_plot2, 
+                             question5_plot3, 
+                       labels = c("A", "B", "C"),
+                       nrow = 1,  
+                       ncol = 3,
+                       common.legend = T)
+
+question5_plot4
+
+### Question 6 ####
+# Annotate your code, push it to GitHub. Provide me a link to your GitHub
+
+# https://github.com/RaimundoEspejo/Data_Vis_Cod_Chall_3.git
